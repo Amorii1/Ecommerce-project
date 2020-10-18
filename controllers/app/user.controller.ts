@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { okRes, errRes, getOTP } from "../../helpers/tools";
+import { okRes, errRes, getOTP, hashMyPassword,auth } from "../../helpers/tools";
 import * as validate from "validate.js";
 import validation from "../../helpers/validation.helper";
 import { User } from "../../src/entity/User";
 import PhoneFormat from "../../helpers/phone.helper";
+const jwt = require("jsonwebtoken");
 
 /**
  *
@@ -15,6 +16,7 @@ export default class UserController {
    * @param res
    */
   static async register(req: Request, res: Response): Promise<object> {
+    let user: any;
     let notValid = validate(req.body, validation.register());
     if (notValid) return errRes(res, notValid);
 
@@ -22,7 +24,6 @@ export default class UserController {
     if (!phoneObj.isNumber)
       return errRes(res, `Phone ${req.body.phone} is not a valid`);
 
-    let user: any;
     try {
       user = await User.findOne({ where: { phone: req.body.phone } });
       if (user) return errRes(res, `Phone ${req.body.phone} already exists`);
@@ -30,19 +31,50 @@ export default class UserController {
       return errRes(res, error);
     }
 
-    // TODO: create JWT Token
-    // TODO: Hash the password
+    let hash = await hashMyPassword(req.body.password);
+
     // TODO: send the SMS
 
     user = await User.create({
       ...req.body,
+      password: hash,
       active: true,
       complete: false,
       otp: getOTP(),
     });
-
     await user.save();
-
-    return okRes(res, { data: user });
+    let token = jwt.sign({ id: user.id }, "shhh");
+    return okRes(res, { userInfo: user, token });
+  }
+  /**
+   * 
+   * @param req 
+   * @param res 
+   */
+  static async otpCheking(req: Request, res: Response): Promise<object> {
+      let user: any;
+    let authToken= auth(req,res);
+      if (authToken=true){
+      try {
+        user = await User.findOne({ where: { phone: req.body.phone } });
+        if (user.otp===req.body.otp) {
+          // user = await User.findOne({ where: { name: req.body.name ,phone:req.body.phone,password:req.body.password } });
+          user.complete=true;
+          await user.save();
+          return okRes(res,"OTP checked, registeration completed")
+        }
+        else
+        { 
+          // user = await User.findOne({ where: { name: req.body.name ,phone:req.body.phone,password:req.body.password } });
+        user.otp=0;
+        await user.save();
+        return errRes(res, "wrong OTP entry");}
+      }
+       catch(error) { 
+        return errRes(res, error);
+      }
+    }
+    else
+    return authToken;
   }
 }

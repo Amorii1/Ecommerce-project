@@ -5,6 +5,8 @@ import UserController from './../../controllers/app/user.controller';
 //create V1 version
 //// register
 router.post("/register",UserController.register);
+//// otp
+router.post("/otp", UserController.otpCheking);
 //// login
 //// categories
 //// category products
