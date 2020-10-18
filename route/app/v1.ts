@@ -8,6 +8,8 @@ router.post("/register",UserController.register);
 //// otp
 router.post("/otp", UserController.otpCheking);
 //// login
+router.post("/login", UserController.login);
+
 //// categories
 //// category products
 //// check out

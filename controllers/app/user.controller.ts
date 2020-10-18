@@ -4,6 +4,7 @@ import * as validate from "validate.js";
 import validation from "../../helpers/validation.helper";
 import { User } from "../../src/entity/User";
 import PhoneFormat from "../../helpers/phone.helper";
+import { error } from "console";
 const jwt = require("jsonwebtoken");
 
 /**
@@ -76,5 +77,30 @@ export default class UserController {
     }
     else
     return authToken;
+  }
+  /**
+   * 
+   * @param req 
+   * @param res 
+   */
+  static async login(req: Request, res: Response): Promise<object>{
+    let isNotValid = validate(req.body, validation.login());
+    if (isNotValid) return errRes(res, isNotValid);
+
+    let user: any;
+    try {
+      user = await User.findOne({
+        where: { phone: req.body.phone, password: req.body.password },
+        //should use bycrypt compare
+      });
+      if (user && user.complete === true)
+        return okRes(res, ` you are sign in`);
+        else if(user&&user.complete===false)
+        return errRes(res,'complete your registeration please from OTP page.')
+        else
+        return errRes(res,error);
+    } catch (error) {
+      return errRes(res, error);
+    }
   }
 }
