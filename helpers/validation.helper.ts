@@ -158,4 +158,25 @@ export default class Validator {
       type: "number",
     },
   });
+
+// /**
+//  * 
+//  * @param must 
+//  */
+//   static zcMethod=(must=true)=>({
+//     walletNumber: {
+//       presence: must,
+//       type: "string",
+//       length: { maximum: 15, minimum: 10 },
+//     },
+//     pin:{
+//       presence:must,
+//       type:"number",
+//     },
+//     otp: {
+//       presence: must,
+//       type: "number",
+//     }
+    
+//   })
 }

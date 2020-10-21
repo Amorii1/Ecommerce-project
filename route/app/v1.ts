@@ -4,6 +4,7 @@ import userAuth from "../../middleware/app/userAuth";
 
 import UserController from "../../controllers/app/user.controller";
 import HomeController from "../../controllers/app/home.controller";
+import MethodController from './../../controllers/app/method.controller';
 
 // USER CONTROLLER
 router.post("/register", UserController.register);
@@ -19,5 +20,9 @@ router.get("/categories", HomeController.getCategories);
 router.get("/products/:category", HomeController.getProducts);
 router.get("/methods", HomeController.getMethods);
 router.get("/invoices", userAuth, HomeController.getInvoices);
+
+// METHOD CONTROLLER
+router.post("/zcPayment",userAuth,MethodController.zcPayment);
+router.get('redirect',userAuth,MethodController.redirect);
 
 export default router;

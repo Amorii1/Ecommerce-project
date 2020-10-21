@@ -243,9 +243,12 @@ export default class UserController {
     user.password=hashPassword;
     await user.save();
     user.password=null;
-    
+
+    //give token
+    const token = jwt.sign({ id: user.id }, config.jwtSecret);
+
     //return 
-    return okRes(res,user);
+    return okRes(res,token);
   }
 
 

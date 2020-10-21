@@ -13,14 +13,17 @@
       "@types/bcryptjs": "^2.4.2",
       "@types/dotenv": "^8.2.0",
       "@types/jsonwebtoken": "^8.5.0",
+      "@types/request": "^2.48.5",
       "bcryptjs": "^2.4.3",
       "dotenv": "^8.2.0",
       "express": "^4.17.1",
       "jsonwebtoken": "^8.5.1",
       "pg": "^8.4.1",
       "reflect-metadata": "^0.1.13",
+      "request": "^2.88.2",
       "typeorm": "0.2.28",
-      "validate.js": "^0.13.1"
+      "validate.js": "^0.13.1",
+      "zaincash": "^1.0.5"
    },
    "scripts": {
       "start": "ts-node src/index.ts"
