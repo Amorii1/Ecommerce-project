@@ -25,6 +25,15 @@ export class Invoice extends BaseEntity {
   status: string;
 
   @Column()
+  zcMsg: string;
+
+  @Column()
+  zcOperation: string;
+
+  @Column()
+  zcMsisdn: string;
+
+  @Column()
   method: string;
 
   @Column()

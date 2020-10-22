@@ -23,6 +23,9 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({ nullable: true })
+  resetPassword: string;
+
+  @Column({ nullable: true })
   otp: number;
 
   @Column()

@@ -16,7 +16,8 @@ import { async } from "validate.js";
 import { Product } from "../../src/entity/Product";
 import { Invoice } from "../../src/entity/Invoice";
 import { InvoiceItem } from "../../src/entity/InvoiceItem";
-
+import * as ZC from "zaincash";
+const zcSecret = "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G";
 /**
  *
  */
@@ -40,12 +41,12 @@ export default class UserController {
     //check if user registered
     let user: any;
     try {
-      user = await User.findOne({ where: { phone: req.body.phone } });
+      user = await User.findOne({ where: { phone } });
       if (user) {
         if (user.complete)
           return errRes(res, `Phone ${req.body.phone} already exists`);
-          //if not complete , complete registration
-          //give token
+        //if not complete , complete registration
+        //give token
         const token = jwt.sign({ id: user.id }, config.jwtSecret);
         //create otp
         user.otp = getOTP();
@@ -153,40 +154,43 @@ export default class UserController {
   }
 
   /**
-   * 
-   * @param req 
-   * @param res 
+   *
+   * @param req
+   * @param res
    */
-  static async editUser(req,res):Promise<object>{
+  static async editUser(req, res): Promise<object> {
     // get the user let user = req.user
-   let user = req.user;
+    let user = req.user;
 
-     // checking the old password
-     let validPassword = await comparePassword(req.body.oldPassword, user.password);
+    // checking the old password
+    let validPassword = await comparePassword(
+      req.body.oldPassword,
+      user.password
+    );
     if (!validPassword) return errRes(res, `Password invalid`);
-   
+
     // validation for the new data
     let isNotValid = validate(req.body, validation.editUser());
     if (isNotValid) return errRes(res, isNotValid);
-    
+
     //editing data
-    user.name=req.body.newName;
+    user.name = req.body.newName;
     const hashPassword = await hashMyPassword(req.body.newPassword);
-    user.password=hashPassword;
-    user.phone=req.body.newPhone;
+    user.password = hashPassword;
+    user.phone = req.body.newPhone;
     await user.save();
-    user.password=null;
-  
+    user.password = null;
+
     return okRes(res, user);
   }
 
   /**
-   * 
-   * @param req 
-   * @param res 
+   *
+   * @param req
+   * @param res
    */
 
-  static async forgotPassword(req,res):Promise<object>{
+  static async forgotPassword(req, res): Promise<object> {
     //validation
     let notValid = validate(req.body, validation.forgotPassword());
     if (notValid) return errRes(res, notValid);
@@ -201,56 +205,77 @@ export default class UserController {
     let user = await User.findOne({ where: { phone } });
     if (!user) return errRes(res, `Phone ${phone} is not registered`);
 
-    //new OTP code
-    user.otp = getOTP();
+    //new reset password code
+    user.resetPassword = `Ab_${getOTP()}_cD`;
     await user.save();
-    user.otp=null;
+    user.resetPassword = null;
+    user.password = null;
+    user.otp = null;
+
+    // create token
+    const numToken = jwt.sign({ phone: user.phone }, config.jwtSecret);
+
     //return
-    return okRes(res,user)
+    return okRes(res, { user, numToken });
   }
-  //TODO:  Redirect from `forgotPassword` to `newPassword` with parameter (phone)
-  
+
   /**
-   * 
-   * @param req 
-   * @param res 
+   *
+   * @param req
+   * @param res
    */
 
-  static async newPassword(req,res):Promise<object>{
-     //validation
-     let notValid = validate(req.body, validation.newPassword());
-     if (notValid) return errRes(res, notValid);
+  static async newPassword(req, res): Promise<object> {
+    //validation
+    let notValid = validate(req.body, validation.newPassword());
+    if (notValid) return errRes(res, notValid);
 
-     //phone format
-    let phoneObj = PhoneFormat.getAllFormats(req.body.phone);
-    if (!phoneObj.isNumber)
-      return errRes(res, `Phone ${req.body.phone} is not a valid`);
-    const phone = phoneObj.globalP;
+    // //phone format
+    // let phoneObj = PhoneFormat.getAllFormats(req.body.phone);
+    // if (!phoneObj.isNumber)
+    //   return errRes(res, `Phone ${req.body.phone} is not a valid`);
+    // const phone = phoneObj.globalP;
 
-     //get user from DB
-     let user = await User.findOne({ where: { phone } });
-     if (!user) return errRes(res, `Phone ${phone} is not registered`);
- 
-    //sign the OTP code
-    if (user.otp != req.body.otp) {
-      user.otp = null;
+    // get token from headers
+    let token = req.headers.token;
+    if (!token) return errRes(res, "please send numToken");
+    let payload: any;
+    try {
+      payload = jwt.verify(token, config.jwtSecret);
+    } catch (error) {
+      return errRes(res, error);
+    }
+
+    const phone = payload.phone;
+
+    //get user from DB
+    let user = await User.findOne({
+      where: { phone, complete: true, active: true },
+    });
+    if (!user) return errRes(res, `Phone ${payload.phone} is not registered`);
+
+    //sign the resetPassword code
+    if (user.resetPassword != req.body.resetPassword) {
+      user.resetPassword = null;
       await user.save();
-      return errRes(res, `The OTP ${req.body.otp} is not correct`);
+      return errRes(
+        res,
+        `The reset Password :  ${req.body.resetPassword} is not correct`
+      );
     }
 
     //sign the new Password
     const hashPassword = await hashMyPassword(req.body.newPassword);
-    user.password=hashPassword;
+    user.password = hashPassword;
     await user.save();
-    user.password=null;
+    user.password = null;
 
     //give token
-    const token = jwt.sign({ id: user.id }, config.jwtSecret);
+    token = jwt.sign({ id: user.id }, config.jwtSecret);
 
-    //return 
-    return okRes(res,token);
+    //return
+    return okRes(res, token);
   }
-
 
   /**
    *
@@ -299,6 +324,27 @@ export default class UserController {
     await invoice.save();
 
     // create ZC things
+    const paymentData = {
+      amount: total,
+      orderId: invoice.id,
+      serviceType: "Amorii E-commerce",
+      redirectUrl: "http://localhost/3001/v1/zc/redirect",
+      production: false,
+      msisdn: "9647835077880",
+      merchantId: "5dac4a31c98a8254092da3d8",
+      secret: zcSecret,
+      lang: "ar",
+    };
+    let zc = new ZC(paymentData);
+    let zcTransactionId: any;
+    try {
+      zcTransactionId = await zc.init();
+    } catch (error) {
+      return errRes(res, error);
+    }
+    let url = `https://api.zaincash.iq/transaction/pay?id=${zcTransactionId}`;
+    invoice.zcTransactionId = zcTransactionId;
+    await invoice.save();
 
     // create the invoice items
     for (const product of products) {
@@ -315,5 +361,35 @@ export default class UserController {
     }
 
     return okRes(res, { data: { invoice } });
+  }
+
+  static async zcRedirect(req, res): Promise<object> {
+    const token = req.query.token;
+
+    let payload: any;
+    try {
+      payload = jwt.verify(token, zcSecret);
+    } catch (error) {
+      return errRes(res, error);
+    }
+    const id = payload.orderid;
+
+    let invoice = await Invoice.findOne(id);
+
+    if (!invoice) return errRes(res, "No such invoice");
+
+    if (payload.status == "success") {
+      invoice.status = "paid";
+      invoice.zcOperation = payload.operationid;
+      invoice.zcMsisdn = payload.msisdn;
+      await invoice.save();
+      return okRes(res, { invoice });
+    }
+    invoice.status = payload.status;
+    invoice.zcOperation = payload.operationid;
+    invoice.zcMsg = payload.msg;
+    await invoice.save();
+
+    return errRes(res, { data: { invoice } });
   }
 }

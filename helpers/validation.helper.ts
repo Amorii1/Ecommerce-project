@@ -52,8 +52,8 @@ export default class Validator {
   });
 
   /**
-   * 
-   * @param must 
+   *
+   * @param must
    */
 
   static editUser = (must = false) => ({
@@ -74,7 +74,7 @@ export default class Validator {
   });
 
   /**
-   * 
+   *
    * @param must :boolean
    */
   static forgotPassword = (must = true) => ({
@@ -82,32 +82,30 @@ export default class Validator {
       presence: must,
       type: "string",
       length: { maximum: 15, minimum: 10 },
-    }
+    },
   });
 
   /**
-   * 
-   * @param must 
+   *
+   * @param must
    */
 
   static newPassword = (must = true) => ({
-    phone: {
-      presence: must,
-      type: "string",
-      length: { maximum: 15, minimum: 10 },
-    },
+    // phone: {
+    //   presence: must,
+    //   type: "string",
+    //   length: { maximum: 15, minimum: 10 },
+    // },
     newPassword: {
       presence: must,
       type: "string",
       length: { maximum: 15, minimum: 4 },
     },
-    otp: {
+    resetPassword: {
       presence: must,
-      type: "number",
-    }
+      type: "string",
+    },
   });
-
-
 
   /**
    *
@@ -159,24 +157,24 @@ export default class Validator {
     },
   });
 
-// /**
-//  * 
-//  * @param must 
-//  */
-//   static zcMethod=(must=true)=>({
-//     walletNumber: {
-//       presence: must,
-//       type: "string",
-//       length: { maximum: 15, minimum: 10 },
-//     },
-//     pin:{
-//       presence:must,
-//       type:"number",
-//     },
-//     otp: {
-//       presence: must,
-//       type: "number",
-//     }
-    
-//   })
+  // /**
+  //  *
+  //  * @param must
+  //  */
+  //   static zcMethod=(must=true)=>({
+  //     walletNumber: {
+  //       presence: must,
+  //       type: "string",
+  //       length: { maximum: 15, minimum: 10 },
+  //     },
+  //     pin:{
+  //       presence:must,
+  //       type:"number",
+  //     },
+  //     otp: {
+  //       presence: must,
+  //       type: "number",
+  //     }
+
+  //   })
 }
