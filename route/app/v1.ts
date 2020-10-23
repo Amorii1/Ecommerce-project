@@ -13,14 +13,12 @@ router.post("/editUser", userAuth, UserController.editUser);
 router.post("/forgotPassword", UserController.forgotPassword);
 router.post("/newPassword", UserController.newPassword);
 router.post("/invoice", userAuth, UserController.makeInvoice);
+router.get("/zc/redirect", UserController.zcRedirect);
 
 // HOME CONTROLLER products
 router.get("/categories", HomeController.getCategories);
 router.get("/products/:category", HomeController.getProducts);
 router.get("/methods", HomeController.getMethods);
 router.get("/invoices", userAuth, HomeController.getInvoices);
-
-// METHOD CONTROLLER
-router.get("/zc/redirect", userAuth, UserController.zcRedirect);
 
 export default router;

@@ -12,12 +12,13 @@ import { User } from "../../src/entity/User";
 import PhoneFormat from "../../helpers/phone.helper";
 import * as jwt from "jsonwebtoken";
 import config from "../../config";
+import { env } from "process";
 import { async } from "validate.js";
 import { Product } from "../../src/entity/Product";
 import { Invoice } from "../../src/entity/Invoice";
 import { InvoiceItem } from "../../src/entity/InvoiceItem";
 import * as ZC from "zaincash";
-const zcSecret = "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G";
+
 /**
  *
  */
@@ -300,10 +301,12 @@ export default class UserController {
     // get the products from DB
     let products = await Product.findByIds(ids);
 
+    //declaration
     [
       { id: 1, quantity: 2 },
       { id: 2, quantity: 1 },
     ];
+
     let total = 0;
     //  calculate the total from the products
     for (const product of products) {
@@ -327,22 +330,25 @@ export default class UserController {
     const paymentData = {
       amount: total,
       orderId: invoice.id,
-      serviceType: "Amorii E-commerce",
-      redirectUrl: "http://localhost/3001/v1/zc/redirect",
+      serviceType: "Amorii Shop",
+      redirectUrl: "http://localhost:3001/v1/zc/redirect",
       production: false,
       msisdn: "9647835077880",
       merchantId: "5dac4a31c98a8254092da3d8",
-      secret: zcSecret,
+      secret: "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G",
       lang: "ar",
     };
+
     let zc = new ZC(paymentData);
+
     let zcTransactionId: any;
     try {
       zcTransactionId = await zc.init();
     } catch (error) {
       return errRes(res, error);
     }
-    let url = `https://api.zaincash.iq/transaction/pay?id=${zcTransactionId}`;
+
+    let url = `https://test.zaincash.iq/transaction/pay?id=${zcTransactionId}`;
     invoice.zcTransactionId = zcTransactionId;
     await invoice.save();
 
@@ -360,18 +366,24 @@ export default class UserController {
       await invoiceItem.save();
     }
 
-    return okRes(res, { data: { invoice } });
+    return okRes(res, { data: { invoice, url } });
   }
 
   static async zcRedirect(req, res): Promise<object> {
     const token = req.query.token;
+    console.log(token);
 
     let payload: any;
     try {
-      payload = jwt.verify(token, zcSecret);
+      payload = jwt.verify(
+        token,
+        "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G"
+      );
     } catch (error) {
       return errRes(res, error);
     }
+    console.log(payload);
+
     const id = payload.orderid;
 
     let invoice = await Invoice.findOne(id);

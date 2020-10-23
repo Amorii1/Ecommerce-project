@@ -11,7 +11,7 @@ import { Category } from "./Category";
 import { InvoiceItem } from "./InvoiceItem";
 
 @Entity("products")
-export class Product extends BaseEntity{
+export class Product extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -21,7 +21,7 @@ export class Product extends BaseEntity{
   @Column({ type: "float" })
   price: number;
 
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   @Column()
