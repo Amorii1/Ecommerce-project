@@ -331,7 +331,8 @@ export default class UserController {
       amount: total,
       orderId: invoice.id,
       serviceType: "Amorii Shop",
-      redirectUrl: "http://localhost:3001/v1/zc/redirect",
+      redirectUrl:
+        "https://ecommerce-test-myproject.herokuapp.com/v1/zc/redirect",
       production: false,
       msisdn: "9647835077880",
       merchantId: "5dac4a31c98a8254092da3d8",
