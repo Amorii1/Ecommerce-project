@@ -43,4 +43,10 @@ const hashMyPassword = async (plainPassword) => {
 const comparePassword = async (plainPassword, hash) =>
   await bcrypt.compare(plainPassword, hash);
 
-export { errRes, okRes, getOTP, hashMyPassword, comparePassword };
+const paginate = (p = 1, s = 10) => {
+  let take = s;
+  let skip = (p - 1) * take;
+  return { take, skip };
+};
+
+export { errRes, okRes, getOTP, hashMyPassword, comparePassword, paginate };

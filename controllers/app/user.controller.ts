@@ -331,12 +331,11 @@ export default class UserController {
       amount: total,
       orderId: invoice.id,
       serviceType: "Amorii Shop",
-      redirectUrl:
-        "https://ecommerce-test-myproject.herokuapp.com/v1/zc/redirect",
+      redirectUrl: config.zcRedirect,
       production: false,
-      msisdn: "9647835077880",
-      merchantId: "5dac4a31c98a8254092da3d8",
-      secret: "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G",
+      msisdn: config.zcMsisdn,
+      merchantId: config.zcMerchant,
+      secret: config.zcSecret,
       lang: "ar",
     };
 
@@ -376,10 +375,7 @@ export default class UserController {
 
     let payload: any;
     try {
-      payload = jwt.verify(
-        token,
-        "$2y$10$xlGUesweJh93EosHlaqMFeHh2nTOGxnGKILKCQvlSgKfmhoHzF12G"
-      );
+      payload = jwt.verify(token, config.zcSecret);
     } catch (error) {
       return errRes(res, error);
     }
