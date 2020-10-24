@@ -20,5 +20,6 @@ router.get("/categories", HomeController.getCategories);
 router.get("/products/:category", HomeController.getProducts);
 router.get("/methods", HomeController.getMethods);
 router.get("/invoices", userAuth, HomeController.getInvoices);
+router.post("/uploadImg", HomeController.uploadImg);
 
 export default router;

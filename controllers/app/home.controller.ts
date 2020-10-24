@@ -1,9 +1,11 @@
-import { errRes, okRes, paginate } from "../../helpers/tools";
+import { Request, Response } from "express";
+import { errRes, getOTP, okRes, paginate } from "../../helpers/tools";
 import { Category } from "../../src/entity/Category";
 import { Invoice } from "../../src/entity/Invoice";
 import { Method } from "../../src/entity/Method";
 import { Product } from "../../src/entity/Product";
-
+import * as fs from "fs";
+import * as imgbbUploader from "imgbb-uploader";
 /**
  *
  */
@@ -96,5 +98,22 @@ export default class HomeController {
     } catch (error) {
       return errRes(res, error);
     }
+  }
+
+  static async uploadImg(req: Request, res: Response): Promise<object> {
+    if (!req.files) return errRes(res, `image is not found`);
+    let fileName = `image`;
+    let image = req.files.image;
+    let path = `./public/${fileName}.png`;
+    image.mv(path, function (err) {
+      if (err) return errRes(res, "error");
+      imgbbUploader("imageBbUploader", path)
+        .then((response) => {
+          fs.unlink(path, (error) => errRes(res, error));
+          return okRes(res, response);
+        })
+        .catch((error) => console.error(1));
+    });
+    return okRes(res, "good");
   }
 }

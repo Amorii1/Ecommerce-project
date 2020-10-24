@@ -9,4 +9,5 @@ export default config = {
   zcMsisdn: process.env.ZC_MSISDN || "",
   zcMerchant: process.env.ZC_MERCHANT || "",
   zcRedirect: process.env.ZC_REDIRECT || "",
+  imageBbUploader: process.env.IMAGE_BB_UPLOADER || "",
 };

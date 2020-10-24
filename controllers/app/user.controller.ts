@@ -5,6 +5,7 @@ import {
   getOTP,
   hashMyPassword,
   comparePassword,
+  sendSMS,
 } from "../../helpers/tools";
 import * as validate from "validate.js";
 import validation from "../../helpers/validation.helper";
@@ -73,8 +74,10 @@ export default class UserController {
     });
     await user.save();
     user.password = null;
+
+    //sending sms
+    sendSMS(user.otp, user.phone);
     user.otp = null;
-    // TODO: send the SMS
 
     const token = jwt.sign({ id: user.id }, config.jwtSecret);
     return okRes(res, { data: { user, token } });

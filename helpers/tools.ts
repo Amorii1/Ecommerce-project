@@ -1,4 +1,8 @@
 import * as bcrypt from "bcryptjs";
+const accountSid = "AC27719b221fa9f1c808c07dd98a614297";
+const authToken = "79eab7e154af22a2141ce754a2e13ba4";
+import * as twilio from "twilio";
+const client = twilio(accountSid, authToken);
 
 /**
  *
@@ -49,4 +53,18 @@ const paginate = (p = 1, s = 10) => {
   return { take, skip };
 };
 
-export { errRes, okRes, getOTP, hashMyPassword, comparePassword, paginate };
+const sendSMS = (body: string, to: string) => {
+  client.messages
+    .create({ body, from: "+14152363940", to })
+    .then((message) => console.log(message.sid));
+};
+
+export {
+  errRes,
+  okRes,
+  getOTP,
+  hashMyPassword,
+  comparePassword,
+  paginate,
+  sendSMS,
+};
