@@ -23,6 +23,8 @@
     "imgbb": "^1.0.37",
     "imgbb-uploader": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.6",
     "pg": "^8.4.1",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",

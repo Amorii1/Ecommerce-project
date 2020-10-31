@@ -17,6 +17,9 @@ export class Category extends BaseEntity {
   title: string;
 
   @Column({ nullable: true })
+  arTitle: string;
+
+  @Column({ nullable: true })
   image: string;
 
   @Column()

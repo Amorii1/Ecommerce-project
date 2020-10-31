@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as morgan from "morgan";
 import { createConnection } from "typeorm";
 import { errRes } from "../helpers/tools";
 const app = express();
@@ -10,6 +11,8 @@ createConnection().then(async (connection) => {
   app.use(uploadImg({}));
   //  Middleware to get the json from the request
   app.use(express.json());
+  //log middleware
+  app.use(morgan("dev"));
   // my route handler
   app.use("/v1", v1);
   //404

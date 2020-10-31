@@ -18,6 +18,9 @@ export class Product extends BaseEntity {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  arName: string;
+
   @Column({ type: "float" })
   price: number;
 

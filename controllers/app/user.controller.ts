@@ -36,8 +36,14 @@ export default class UserController {
 
     //phone format
     let phoneObj = PhoneFormat.getAllFormats(req.body.phone);
-    if (!phoneObj.isNumber)
+    if (!phoneObj.isNumber) {
+      //languages
+      let lang = req.headers.lang;
+      if (lang === "ar") {
+        return errRes(res, `الرقم ${req.body.phone} غير صالح`);
+      }
       return errRes(res, `Phone ${req.body.phone} is not a valid`);
+    }
     let phone = phoneObj.globalP;
 
     //check if user registered
@@ -302,7 +308,7 @@ export default class UserController {
     let user = req.user;
 
     // get the products from DB
-    let products = await Product.findByIds(ids);
+    let products = await Product.findByIds(ids, { where: { active: true } });
 
     //declaration
     [

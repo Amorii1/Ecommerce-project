@@ -6,6 +6,7 @@ import { Method } from "../../src/entity/Method";
 import { Product } from "../../src/entity/Product";
 import * as fs from "fs";
 import * as imgbbUploader from "imgbb-uploader";
+import { Like, Raw } from "typeorm";
 /**
  *
  */
@@ -16,17 +17,24 @@ export default class HomeController {
    * @param res
    */
   static async getCategories(req, res): Promise<object> {
-    //query == ? in the link
-    let { p, s } = req.query;
+    let { p, s, q } = req.query;
     let { skip, take } = paginate(p, s);
 
+    let whereObj: object;
+    //SEARCH
+    if (q) {
+      whereObj = {
+        active: true,
+        title: Raw((alias) => `${alias} ILIKE '%${q}%'`),
+      };
+    } else whereObj = { active: true };
+
     try {
-      // the diff between find & findAndCount , this one returns total categories
       let data = await Category.findAndCount({
-        where: { active: true },
+        where: whereObj,
         relations: ["products"],
         take,
-        skip: 0,
+        skip,
         order: { id: "ASC" },
       });
       return okRes(res, { data });
