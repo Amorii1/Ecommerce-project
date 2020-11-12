@@ -2,6 +2,7 @@
  *
  */
 export default class Validator {
+  //import each element without *
   /**
    *
    * @param must: boolean

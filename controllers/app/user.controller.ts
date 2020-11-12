@@ -13,12 +13,12 @@ import { User } from "../../src/entity/User";
 import PhoneFormat from "../../helpers/phone.helper";
 import * as jwt from "jsonwebtoken";
 import config from "../../config";
-import { env } from "process";
-import { async } from "validate.js";
 import { Product } from "../../src/entity/Product";
 import { Invoice } from "../../src/entity/Invoice";
 import { InvoiceItem } from "../../src/entity/InvoiceItem";
 import * as ZC from "zaincash";
+import * as imgbbUploader from "imgbb-uploader";
+import * as fs from "fs";
 
 /**
  *
@@ -34,16 +34,15 @@ export default class UserController {
     let notValid = validate(req.body, validation.register());
     if (notValid) return errRes(res, notValid);
 
+    //languages
+    let lang: any;
+    lang = req.query.lang || "en";
+    lang = lang || "en";
+
     //phone format
     let phoneObj = PhoneFormat.getAllFormats(req.body.phone);
-    if (!phoneObj.isNumber) {
-      //languages
-      let lang = req.headers.lang;
-      if (lang === "ar") {
-        return errRes(res, `الرقم ${req.body.phone} غير صالح`);
-      }
-      return errRes(res, `Phone ${req.body.phone} is not a valid`);
-    }
+    if (!phoneObj.isNumber)
+      return errRes(res, `phoneInvalid`, "phone", 400, lang, req.body.phone);
     let phone = phoneObj.globalP;
 
     //check if user registered
@@ -341,7 +340,7 @@ export default class UserController {
       orderId: invoice.id,
       serviceType: "Amorii Shop",
       redirectUrl: config.zcRedirect,
-      production: false,
+      production: config.zcProduction,
       msisdn: config.zcMsisdn,
       merchantId: config.zcMerchant,
       secret: config.zcSecret,
@@ -409,5 +408,21 @@ export default class UserController {
     await invoice.save();
 
     return errRes(res, { data: { invoice } });
+  }
+
+  static async upload(req: Request, res: Response): Promise<object> {
+    if (!req.files) return errRes(res, `Image is missing`);
+    let image = req.files.image;
+    let fileName = "image";
+    let path = `./public/${fileName}.png`;
+    image.mv(path, function (err) {
+      if (err) return errRes(res, err);
+      imgbbUploader(config.imageBbUploader, `./public/${fileName}.png`)
+        .then((r) => {
+          fs.unlink(path, (error) => errRes(res, error));
+          return okRes(res, r);
+        })
+        .catch((error) => console.error(1));
+    });
   }
 }

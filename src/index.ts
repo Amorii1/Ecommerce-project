@@ -17,7 +17,7 @@ createConnection().then(async (connection) => {
   app.use("/v1", v1);
   //404
   app.use((req, res, next) => {
-    return errRes(res, "404 Page Not Found");
+    return errRes(res, "404 Not found", "404", 404);
   });
   //listener
   app.listen(port, () => {

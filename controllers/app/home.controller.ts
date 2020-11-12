@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errRes, getOTP, okRes, paginate } from "../../helpers/tools";
+import { errRes, okRes, paginate } from "../../helpers/tools";
 import { Category } from "../../src/entity/Category";
 import { Invoice } from "../../src/entity/Invoice";
 import { Method } from "../../src/entity/Method";
@@ -49,14 +49,31 @@ export default class HomeController {
    * @param res
    */
   static async getProducts(req, res): Promise<object> {
-    let { p, s } = req.query;
+    let { p, s, q } = req.query;
     let { skip, take } = paginate(p, s);
 
     let category = req.params.category;
     const active = true;
+    //search
+    let whereObj: any;
+    if (q)
+      whereObj = [
+        {
+          active,
+          category,
+          title: Raw((alias) => `${alias} ILIKE '%${q}%'`),
+        },
+        {
+          active,
+          category,
+          description: Raw((alias) => `${alias} ILIKE '%${q}%'`),
+        },
+      ];
+    else whereObj = { active, category };
+
     try {
       let data = await Product.find({
-        where: { active, category },
+        where: whereObj,
         relations: ["category"],
         take,
         skip,
@@ -92,7 +109,6 @@ export default class HomeController {
     try {
       let data = await Invoice.find({
         where: { user: req.user },
-
         join: {
           alias: "invoice",
           leftJoinAndSelect: {
